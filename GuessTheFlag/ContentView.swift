@@ -32,6 +32,12 @@ struct ContentView: View {
     @State private var score: Int = 0
     @State private var questionAnswered: Int = 0
     
+    @State private var rotationDegrees: Double = 0
+    
+    @State private var tappedButton: Int?
+    @State private var canFadeButton: Bool = false
+    @State private var canScaleButton: Bool = false
+    
     var body: some View {
         ZStack {
             RadialGradient(stops: [
@@ -67,9 +73,18 @@ struct ContentView: View {
                 }
                 ForEach(0..<3) { number in
                     Button {
+                        tappedButton = number
+                        withAnimation {
+                            canFadeButton = true
+                            canScaleButton = true
+                        }
                         flagTapped(number)
                     } label: {
+                        let isTappedButton = number == tappedButton
                         FlagImage(countries[number])
+                            .rotation3DEffect(.degrees(isTappedButton ? 360 : .zero), axis: (x: 0, y: 1, z: 0))
+                            .opacity(canFadeButton && !isTappedButton ? 0.25 : 1)
+                            .scaleEffect(canFadeButton && !isTappedButton ? 0.5 : 1)
                     }
                 }
             }
@@ -108,6 +123,11 @@ struct ContentView: View {
     func askQuestion() {
         countries.shuffle()
         correctAnswer = Int.random(in: 0...2)
+        withAnimation {
+            canFadeButton = false
+            canScaleButton = false
+            tappedButton = nil
+        }
     }
 }
 
